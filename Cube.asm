@@ -1,6 +1,6 @@
 ;Constants
 XOFFSET	= 160
-YOFFSET = 130
+YOFFSET = 101
 
 ;External absolute addresses
 DrawCube 	= draw_cube
@@ -328,139 +328,160 @@ mh_var	adc #0
 		inc $d020
 
 		;Draw the lines on BP 0
-		lda #0
-		sta lineBpln.BP 
-		
+		lda #1
+		sta lineCol.Colour
 x1a		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y1a		lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x3a		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y3a		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		inc $d020
 
+		lda #3
+		sta lineCol.Colour
 x1b		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y1b		lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x2a		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y2a		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		inc $d020
 
+		lda #1
+		sta lineCol.Colour
 x1c		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y1c		lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x5a		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y5a		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		inc $d020
 
+		lda #3
+		sta lineCol.Colour
 x6a		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y6a		lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x5b		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y5b		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		inc $d020
 
+		lda #2
+		sta lineCol.Colour
 x6b		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y6b		lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x2b		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y2b		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		inc $d020
 
+		lda #2
+		sta lineCol.Colour
 x6c		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y6c		lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x8a		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y8a		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		inc $d020
 
+		lda #2
+		sta lineCol.Colour
 x4a		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y4a		lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x2c		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y2c		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		dec $d020
 
+		lda #2
+		sta lineCol.Colour
 x4b		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y4b		lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x8b		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y8b		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		dec $d020
 
+		lda #3
+		sta lineCol.Colour
 x4c		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y4c		lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x3b		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y3b		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		dec $d020
 
+		lda #3
+		sta lineCol.Colour
 x7a		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y7a		lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x8c		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y8c		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		dec $d020
 
+		lda #1
+		sta lineCol.Colour
 x7b		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y7b		lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x3c		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y3c		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		dec $d020
 
+		lda #1
+		sta lineCol.Colour
 x7c		lda #0
-		sta lineBpln.X1
+		sta lineCol.X1
 y7c 	lda #0
-		sta lineBpln.Y1
+		sta lineCol.Y1
 x5c		lda #0
-		sta lineBpln.X2
+		sta lineCol.X2
 y5c		lda #0
-		sta lineBpln.Y2
-		jsr lineBpln.Line
+		sta lineCol.Y2
+		jsr lineCol.Line
 		dec $d020
 
 		rts

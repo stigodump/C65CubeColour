@@ -8,7 +8,6 @@ START_INT_CODE		= $1800
 BASIC				= $2000
 CODE	 			= $2020
 DRAW_COL_PAGE 		= $2a00
-DRAW_BPLN_PAGE 		= $2b00
 SIN_TABLE			= $2c00
 PRJ_TABLE			= $2d00
 
@@ -24,10 +23,6 @@ PRJ_TABLE			= $2d00
 	.dsection draw_col_page
 	.cerror * > DRAW_COL_PAGE + $ff, "Not enough space"
 
-* = DRAW_BPLN_PAGE
-	.dsection draw_bpln_page
-	.cerror * > DRAW_BPLN_PAGE + $ff, "Not enough space"
-
 * = BASIC
 	.byte $00										;Start
 	;.byte $0a,$20,$0a,$00,$fe,$02,$20,$30,$00		;10 BANK 0
@@ -42,18 +37,7 @@ Start			sei
 				ldy $0116
 				ldz $0117
 				map
-				;eom
-				;pla
-				lda $01
-				;Bank IO in via C64 mechanism
-				;lda #$35
-				;sta $01
-				;End MAP sequence
 				eom 
-				;thus allowing interrupts to occur again EOM
-				;Map all C65 ROMS
-				;lda #%10000000
-				;tsb $d030
 				
 				;Save and update IRQ interrupt vector
  				lda $314
@@ -65,23 +49,31 @@ Start			sei
 				lda #>Int
 				sta $315
 
+				;Set raster compare hi bit
 				lda #%10000000
-				tsb $d011
+				trb $d011
 				
+				;Set first four colours in colour pallet
 				ldx #15
 				lda #0
+				;Black
+				sta $d100
+				sta $d200
+				sta $d300
+				;Reb
 				stx $d101
 				sta $d201
 				sta $d301
+				;Green
 				sta $d102
-				sta $d202
-				stx $d302
-				ldy	#8
-				sty $d103
-				ldy #10
-				sty $d203
-				sta $d303
+				stx $d202
+				sta $d302
+				;Blue
+				sta $d103
+				sta $d203
+				stx $d303
 	
+				;Set two bitplanes
 				lda #%10001000
 				sta $d033
 				sta $d034
@@ -90,14 +82,16 @@ Start			sei
 				lda #%01010000
 				sta $d031
 
+				;Clear whole BP1 and BP2
 				lda #0
 				sta $d702
-				lda #>dma_job2
+				lda #>dma_clrscrn
 				sta $d701
-				lda #<dma_job2
+				lda #<dma_clrscrn
 				sta $d700
 				cli
 
+				;Read Keyboard
 -				jsr ($032a)
 				cmp	#$58
 				beq XKeyP
@@ -137,16 +131,16 @@ ZKeyM			dec za
 				sta colour
 				bra -
 
-Int				;Clear all CPU mapping
-				
+Int				;Interrupt entry point
 				lda #1
 				sta $d020
 
+				;Clear part of BP1 and BP2
 				lda #0
 				sta $d702
-				lda #>dma_job1
+				lda #>dma_clrcube
 				sta $d701
-				lda #<dma_job1
+				lda #<dma_clrcube
 				sta $d700
 
 				inc $d020
@@ -181,19 +175,40 @@ ya				.byte 0
 za 				.byte 5
 colour			.byte 0
 
-dma_job2	.byte %00000111 ;command low byte: FILL+CHAIN
+;DMA job to clear whole of both bitplanes
+dma_clrscrn	.byte %00000111 ;command low byte: FILL+CHAIN
 			.word 8000		;40x200 = 8000
-			.word 0000		;fill value
+			.word 0000		;source address/fill value
 			.byte 0			;source Bank
 			.word $8000		;destination address
 			.byte 1			;destination Bank
 			.byte 0			;command hi byte
 			.word 0			;modulo
-dma_job1	.byte %00000011	;command low byte: FILL
+
+			.byte %00000011	;command low byte: FILL
 			.word 8000		;40x200 = 8000
-			.word 0000		;fill value
+			.word 0000		;source address/fill value
 			.byte 0			;source Bank
 			.word $8000		;destination address
+			.byte 0			;destination Bank
+			.byte 0			;command hi byte
+			.word 0			;modulo
+
+;DMA job to clear BP1 and BP2 where cube is drawn
+dma_clrcube	.byte %00000111 ;command low byte: FILL+CHAIN
+			.word 4864		;40x200 = 8000
+			.word 0000		;source address/fill value
+			.byte 0			;source Bank
+			.word 34496		;destination address
+			.byte 1			;destination Bank
+			.byte 0			;command hi byte
+			.word 0			;modulo
+
+			.byte %00000011	;command low byte: FILL
+			.word 4864		;40x200 = 8000
+			.word 0			;source address/fill value
+			.byte 0			;source Bank
+			.word 34496		;destination address
 			.byte 0			;destination Bank
 			.byte 0			;command hi byte
 			.word 0			;modulo
@@ -222,11 +237,6 @@ prj_tbl 	.for i := 0, i < 128, i += 1
 			.next
 
 		.section draw_col_page
-;lineCol 		.binclude "LineColour.asm"
+lineCol 		.binclude "LineColour.asm"
 		.send
-
-		.section draw_bpln_page
-lineBpln		.binclude "LineBPlane.asm"
-		.send
-
 
