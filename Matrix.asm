@@ -1,3 +1,14 @@
+;******************************************************************
+;
+; Calculate 3D rotation matrix from supplied X Y Z angles. Supplied 
+; angles are -128 to 127. Matrix will output size +/-64. 
+;  
+;	Auther: R Welbourn
+;	Discord: Stigodump
+;	Date: 12/03/2021
+;	Assembler: 64TAS Must be at least build 2625
+;
+;******************************************************************
 ;External absolute addresses
 CalcMatrix 	= calc_matrix 	;Calculate matix routine address
 X			= sx			;X rotation value
@@ -229,3 +240,17 @@ mh_var 	adc #0		;mh
 		sta cube.MH
 
 		rts
+
+;SIN & COS Tables
+			.align $100
+
+sin_tbl 	.for s := 0, s < 256, s += 1
+				.char (63.0 * sin((s * (360.0 / 256.0)) * (pi / 180.0)));
+			.next
+
+cos_tbl		.for c := 0, c < 256, c += 1
+				.char (63.0 * cos((c * (360.0 / 256.0)) * (pi / 180.0)));
+			.next
+
+
+

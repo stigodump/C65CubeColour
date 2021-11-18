@@ -1,9 +1,22 @@
+;******************************************************************
+;
+; Multiply fixed size cube by suppleid Matrix and project onto
+; screen. Draw the lines of the cube onto the screen. 
+;
+;	Auther: R Welbourn
+;	Discord: Stigodump
+;	Date: 12/03/2021
+;	Assembler: 64TAS Must be at least build 2625
+;
+;******************************************************************
 ;Constants
 XOFFSET	= 160
 YOFFSET = 101
 
 ;External absolute addresses
+;Entry adress
 DrawCube 	= draw_cube
+;Matrix values
 MA 			= ma_	;ma variable
 MB 			= mb_	;mb variable
 MC 			= mc_	;mc variable
@@ -26,7 +39,7 @@ mh_ 		= mh_var + 1	;mh variable
 mi_ 		= mi_var + 1	;mi variable
 
 draw_cube
-		;cube point 1 (1,1,1)
+	;cube point 1 (1,1,1)
 		;z = (cube[p][0] * mc) + (cube[p][1] * mf) + (cube[p][2] * mi)
 mc_var	lda #0
 		clc 
@@ -43,7 +56,8 @@ ma_var	lda #0
 md_var	adc #0
 mg_var	adc #0
 		sta multiply.MA 	;x
-		;p1x = 128 + ((x * prj_z) / 256)
+
+		;p1x = XOFFSET + ((x * prj_z) / 256)
 		jsr multiply.MultAB	;result / 256 in A
 		clc
 		adc #XOFFSET		;add offset
@@ -57,7 +71,8 @@ mb_var	lda #0
 me_var	adc #0
 mh_var	adc #0
 		sta multiply.MA		;y
-		;p1y = 100 + ((y * prj_z) / 256)
+
+		;p1y = YOFFSET + ((y * prj_z) / 256)
 		jsr multiply.MultAB	;result / 256 in A
 		clc
 		adc #YOFFSET		;add offset
@@ -65,7 +80,7 @@ mh_var	adc #0
 		sta y1b+1
 		sta y1c+1
 		
-		;cube point 2 (1,-1,1)
+	;cube point 2 (1,-1,1)
 		;z = (cube[p][0] * mc) + (cube[p][1] * mf) + (cube[p][2] * mi)
 		lda mc_
 		sec 
@@ -101,7 +116,7 @@ mh_var	adc #0
 		sta y2b+1
 		sta y2c+1
 
-		;cube point 3 (1,1,-1)
+	;cube point 3 (1,1,-1)
 		;z = (cube[p][0] * mc) + (cube[p][1] * mf) + (cube[p][2] * mi)
 		lda mc_
 		clc 
@@ -140,7 +155,7 @@ mh_var	adc #0
 		sta y3b+1
 		sta y3c+1
 
-		;cube point 4 (1,-1,-1)
+	;cube point 4 (1,-1,-1)
 		;z = (cube[p][0] * mc) + (cube[p][1] * mf) + (cube[p][2] * mi)
 		lda mc_
 		sec 
@@ -176,7 +191,7 @@ mh_var	adc #0
 		sta y4b+1
 		sta y4c+1
 
-		;cube point 5 (-1,1,1)
+	;cube point 5 (-1,1,1)
 		;z = (cube[p][0] * mc) + (cube[p][1] * mf) + (cube[p][2] * mi)
 		lda mf_
 		sec 
@@ -215,7 +230,7 @@ mh_var	adc #0
 		sta y5b+1
 		sta y5c+1
 
-		;cube point 6 (-1,-1,1)
+	;cube point 6 (-1,-1,1)
 		;z = (cube[p][0] * mc) + (cube[p][1] * mf) + (cube[p][2] * mi)
 		lda mi_
 		sec 
@@ -251,7 +266,7 @@ mh_var	adc #0
 		sta y6b+1
 		sta y6c+1
 
-		;cube point 7 (-1,1,-1)
+	;cube point 7 (-1,1,-1)
 		;z = (cube[p][0] * mc) + (cube[p][1] * mf) + (cube[p][2] * mi)
 		lda mf_
 		sec 
@@ -287,7 +302,7 @@ mh_var	adc #0
 		sta y7b+1
 		sta y7c+1
 		
-		;cube point 8 (-1,-1,-1)
+	;cube point 8 (-1,-1,-1)
 		;z = (cube[p][0] * mc) + (cube[p][1] * mf) + (cube[p][2] * mi)
 		lda #0
 		sec 
@@ -327,7 +342,7 @@ mh_var	adc #0
 		sta y8c+1
 		inc $d020
 
-		;Draw the lines on BP 0
+		;Draw the lines
 		lda #1
 		sta lineCol.Colour
 x1a		lda #0
@@ -485,3 +500,11 @@ y5c		lda #0
 		dec $d020
 
 		rts
+
+;Projection table
+prj_tbl 	.for i := 0, i < 128, i += 1
+				.byte (128.0 / (256.0 - i)) * 256.0
+			.next
+			.for i := -128, i < 0, i += 1
+				.byte (128.0 / (256.0 - i)) * 256.0
+			.next

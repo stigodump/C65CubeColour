@@ -1,45 +1,65 @@
-;Mega 65
+;******************************************************************
+;
+; Rotate a cube and draw onto two bitplanes in C65 mode 
+;
+;	Auther: R Welbourn
+;	Discord: Stigodump
+;	Date: 17/11/2021
+;	Assembler: 64TAS Must be at least build 2625
+;	64tass-1.56.2625\64tass.exe -a Build.asm -o Build.prg --tab-size=4
+;	Xemu: Tested using Xemu - ROM 911001 & 920246
+;
+;******************************************************************
 
 ;Target CPU
 	.cpu "4510"
 
 ZERO_PAGE			= $c4
-START_INT_CODE		= $1800
-BASIC				= $2000
-CODE	 			= $2020
-DRAW_COL_PAGE 		= $2a00
-SIN_TABLE			= $2c00
-PRJ_TABLE			= $2d00
+BASIC_CODE			= $2001
+MAIN_CODE 			= $2020
 
 * = ZERO_PAGE
 	.dsection zero_page
 	.cerror * > ZERO_PAGE + $08, "Too many ZP variables"
 
-* = START_INT_CODE
-	.dsection start_int_code
-	.cerror * > START_INT_CODE + $1ff, "Not enough space"
+* = BASIC_CODE
+	.dsection basic_code
+	.cerror * > BASIC_CODE + MAIN_CODE - BASIC_CODE, "Not enough space"
 
-* = DRAW_COL_PAGE
-	.dsection draw_col_page
-	.cerror * > DRAW_COL_PAGE + $ff, "Not enough space"
+* = MAIN_CODE
+	.dsection main_code
+	.cerror * > $5fff, "Not enough space"
 
-* = BASIC
-	.byte $00										;Start
-	;.byte $0a,$20,$0a,$00,$fe,$02,$20,$30,$00		;10 BANK 0
-	.byte $0b,$20,$14,$00,$9e,$36,$31,$34,$34,$00	;20 SYS6144 ($1800)
-	.byte $00,$00									;End				
+	.section basic_code
+		;.byte $00										;Start
+		.byte $0a,$20,$0a,$00,$fe,$02,$20,$30,$00 		;10 BANK 0
+		.byte $16,$20,$14,$00,$9e,$38,$32,$32,$34,$00	;20 SYS8224 ($2020)
+		.byte $00,$00									;End				
+	.send
 
-			.section start_int_code
-Start			sei
-				
+	.section main_code
+				;Set MONITOR memory MAP
 				lda $0114
 				ldx $0115
 				ldy $0116
 				ldz $0117
 				map
-				eom 
-				
+				eom
+
+				;Set DMAgic to F018B
+				lda #%00000001
+				tsb $d703
+
+				;Set 3.5Mhz
+				lda #%01000000
+				trb $d054
+
+				;Set Bitplanes to first 128K
+				lda #%00000111
+				trb $d07c
+
 				;Save and update IRQ interrupt vector
+				sei
  				lda $314
 				sta return+1
 				lda $315
@@ -49,9 +69,11 @@ Start			sei
 				lda #>Int
 				sta $315
 
-				;Set raster compare hi bit
+				;Set raster compare to 245
 				lda #%10000000
 				trb $d011
+				lda #<245
+				sta $d012
 				
 				;Set first four colours in colour pallet
 				ldx #15
@@ -73,7 +95,7 @@ Start			sei
 				sta $d203
 				stx $d303
 	
-				;Set two bitplanes
+				;Set two bitplanes to $8000 Bank0 & Bank1
 				lda #%10001000
 				sta $d033
 				sta $d034
@@ -91,45 +113,7 @@ Start			sei
 				sta $d700
 				cli
 
-				;Read Keyboard
--				jsr ($032a)
-				cmp	#$58
-				beq XKeyP
-				cmp #$59
-				beq YKeyP
-				cmp #$5a
-				beq ZKeyP
-				cmp	#$d8
-				beq XKeyM
-				cmp #$d9
-				beq YKeyM
-				cmp #$da
-				beq ZKeyM
-				bra -
-XKeyP			inc xa
-				lda #02
-				sta colour
-				bra -
-YKeyP			inc ya
-				lda #07
-				sta colour
-				bra -
-ZKeyP			inc za
-				lda #10
-				sta colour
-				bra -
-XKeyM			dec xa
-				lda #03
-				sta colour
-				bra -
-YKeyM			dec ya
-				lda #08
-				sta colour
-				bra -
-ZKeyM			dec za
-				lda #11
-				sta colour
-				bra -
+Wait			bra	Wait
 
 Int				;Interrupt entry point
 				lda #1
@@ -144,7 +128,8 @@ Int				;Interrupt entry point
 				sta $d700
 
 				inc $d020
-
+				
+				;Set rotation angles and calculate matrix
 				lda xa
 				sta matrix.X
 				lda ya
@@ -155,12 +140,14 @@ Int				;Interrupt entry point
 
 				inc $d020
 
+				;Rotate and draw cube
 				jsr cube.DrawCube
 
 				lda colour
 				sta $d020
 
-				inc za
+				;Increment X Y rotation angles
+				inc xa
 				dec timer
 				bne return
 				lda #2
@@ -172,7 +159,10 @@ return			jmp $2000	;Code will set this return address
 timer			.byte 1
 xa				.byte 0
 ya				.byte 0
-za 				.byte 5
+za 				.byte 0
+xi				.byte 0
+yi				.byte 0
+zi 				.byte 0
 colour			.byte 0
 
 ;DMA job to clear whole of both bitplanes
@@ -213,30 +203,9 @@ dma_clrcube	.byte %00000111 ;command low byte: FILL+CHAIN
 			.byte 0			;command hi byte
 			.word 0			;modulo
 
-		.send
-
-* = CODE
-
 matrix		.binclude "Matrix.asm"
 cube		.binclude "Cube.asm"
 multiply	.binclude "Multiply.asm"
+lineCol 	.binclude "LineColour.asm"
 
-sin_tbl 	.for s := 0, s < 256, s += 1
-				.char (63.0 * sin((s * (360.0 / 256.0)) * (pi / 180.0)));
-			.next
-
-cos_tbl		.for c := 0, c < 256, c += 1
-				.char (63.0 * cos((c * (360.0 / 256.0)) * (pi / 180.0)));
-			.next
-
-prj_tbl 	.for i := 0, i < 128, i += 1
-				.byte (128.0 / (256.0 - i)) * 256.0
-			.next
-			.for i := -128, i < 0, i += 1
-				.byte (128.0 / (256.0 - i)) * 256.0
-			.next
-
-		.section draw_col_page
-lineCol 		.binclude "LineColour.asm"
-		.send
-
+			.send
