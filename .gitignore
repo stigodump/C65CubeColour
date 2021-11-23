@@ -1,0 +1,8 @@
+# ignore all symbol files
+*.sym
+# ignore all Batch files
+*.bat
+# ignore all Sublime files
+*.sublime*
+# ignore all text files
+*.txt

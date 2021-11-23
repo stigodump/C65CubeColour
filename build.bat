@@ -1,2 +1,2 @@
 SET SOURCENAME=Build
-\\Mac\Home\Documents\Mega65\Projects\Assemblers\64tass-1.56.2625\64tass.exe -a %SOURCENAME%.asm -o%SOURCENAME%.prg --tab-size=4 -L %SOURCENAME%.txt  --dump-labels -l %SOURCENAME%.sym
+C:\Users\Robert\Documents\Mega65\Projects\Assemblers\64tass-1.56.2625\64tass.exe -a %SOURCENAME%.asm -o%SOURCENAME%.prg --tab-size=4 -L %SOURCENAME%.txt  --dump-labels -l %SOURCENAME%.sym

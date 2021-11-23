@@ -120,6 +120,7 @@ Int				;Interrupt entry point
 				sta $d020
 
 				;Clear part of BP1 and BP2
+	;Need to understand the modulo function to save some time here
 				lda #0
 				sta $d702
 				lda #>dma_clrcube

@@ -1,7 +1,7 @@
 ;******************************************************************
 ;
 ; Draw line X 0 to 255 & Y 0 to 199 onto two bitplanes
-; Colour 0 to 3
+; Colour 0 to 3. Code runs on Base Page (Zero Page)
 ;
 ;	Auther: R Welbourn
 ;	Discord: Stigodump
@@ -16,6 +16,7 @@
 ; cycles per iteration of the line drawing loop can be saved with a
 ; mask overflow detection reimplementation. And possibly other
 ; changes.
+; I think there is a bug detecting a line zero or one pixel long.
 ;
 ;******************************************************************
 
