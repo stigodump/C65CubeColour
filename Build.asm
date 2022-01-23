@@ -5,7 +5,7 @@
 ;	Auther: R Welbourn
 ;	Discord: Stigodump
 ;	Date: 17/11/2021
-;	Assembler: 64TAS Must be at least build 2625
+;	Assembler: 64TASS Must be at least build 2625
 ;	64tass-1.56.2625\64tass.exe -a Build.asm -o Build.prg --tab-size=4
 ;	Xemu: Tested using Xemu - ROM 911001 & 920246
 ;
@@ -61,9 +61,9 @@ MAIN_CODE 			= $2020
 				;Save and update IRQ interrupt vector
 				sei
  				lda $314
-				sta return+1
+				;sta return+1
 				lda $315
-				sta return+2
+				;sta return+2
 				lda #<Int
 				sta $314
 				lda #>Int
@@ -155,7 +155,7 @@ Int				;Interrupt entry point
 				sta timer
 				inc ya
 				
-return			jmp $2000	;Code will set this return address
+return			jmp $f9c3	;Code will set this return address
 
 timer			.byte 1
 xa				.byte 0

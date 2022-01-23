@@ -6,7 +6,7 @@
 ;	Auther: R Welbourn
 ;	Discord: Stigodump
 ;	Date: 12/03/2021
-;	Assembler: 64TAS Must be at least build 2625
+;	Assembler: 64TASS Must be at least build 2625
 ;
 ; There are a few ways to improve the line drawing routine. At the
 ; moment it will only draw on the X axis to pixel 255. This could 
@@ -16,7 +16,6 @@
 ; cycles per iteration of the line drawing loop can be saved with a
 ; mask overflow detection reimplementation. And possibly other
 ; changes.
-; I think there is a bug detecting a line zero or one pixel long.
 ;
 ;******************************************************************
 
@@ -52,14 +51,14 @@ Y2		= DRAW_COL_PAGE + y2var + 1	;Y2 line value
 			lda #INC_ABS
 			bra +
 
-invert		ldx X1
-			ldy X2
-			stx	X2
-			sty X1 
-			ldx Y1
-			ldy Y2
-			stx Y2
-			sty Y1
+invert		ldx x1var + 1
+			ldy x2var + 1
+			stx	x2var + 1
+			sty x1var + 1
+			ldx y1var + 1
+			ldy y2var + 1
+			stx y2var + 1
+			sty y1var + 1
 			bra x2var
 
 			;Set Base Page register
@@ -78,15 +77,15 @@ x1var		sbc #*	;x1 variable
 			taz
 
 			;Set pointer to where first byte of first pixel is
-			lda X1
+			lda x1var + 1
 			lsr
 			lsr
 			lsr
 			sta BPX
-			lda X1
+			lda x1var + 1
 			and #%00000111
 			tax 
-			lda Y1
+			lda y1var + 1
 			sta BPY
 
 			;dy = y1-y2
@@ -122,14 +121,17 @@ y1var		sbc #*	;y1 variable
 +			sta dxcolbit1
 			sta dycolbit1
 			
-			lda #0
+			tya
+			asr a
 
 			;Find longest line axis X or Y for gradient
 			;line draw to use
 			cpy dx1mem+1
-			bge Grady
+			blt Gradx
 			sec
-			bra Gradx
+			cpy #0
+			bne Grady
+			bra exit_line
 
 			;draw line dx+ dy+/- dy<dx
 -			inx
@@ -174,7 +176,7 @@ dycolbit1	tsb B1PIX
 			tza
 			dey
 			bne	-
-			pla
+exit_line	pla
 			tab
 			rts
 
