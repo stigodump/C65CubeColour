@@ -1,8 +1,8 @@
 # ignore all symbol files
 *.sym
 # ignore all Batch files
-*.bat
+make
 # ignore all Sublime files
-*.sublime*
+*.sublime-*
 # ignore all text files
 *.txt
